@@ -1,0 +1,689 @@
+<title>Hey Y'all Happy Hours</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<style>
+/* Layout: one phone-width column centered on a coral ground; screens swap in place (where, vibe, matches, venue, map). Single deliberate look in both themes. */
+:root {
+  --ground: #FF8A5B;
+  --ink: #1A1440;
+  --paper: #FFFFFF;
+  --sun: #FFD23F;
+  --mint: #8FE3CF;
+  --lilac: #E4E7FF;
+  --blue: #1B2F9E;
+  --price: #B8321A;
+  --blush: #FFE9DF;
+  --muted: #3D3566;
+  --display: 'Bagel Fat One', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  --body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+html, body { background: var(--ground); color: var(--ink); }
+body { font-family: var(--body); font-size: 15px; line-height: 1.45; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 calc(40px + env(safe-area-inset-bottom, 0px)); -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; }
+.app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; padding-top: 20px; }
+.main, .side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.s-results .side { display: none; }
+@media (min-width: 640px) { .minis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 960px) {
+  .app { max-width: 1160px; padding-top: 32px; }
+  .s-start, .s-vibe { max-width: 600px; }
+  .s-results, .s-detail, .s-map { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); column-gap: 48px; align-items: start; }
+  .s-map { grid-template-columns: minmax(0, 1fr) minmax(340px, 400px); }
+  .s-results .side { display: flex; }
+  .side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); }
+  .s-detail .side { padding-top: 60px; }
+  .s-map .side { padding-top: 62px; }
+  .s-results .side { padding-top: 60px; }
+  h1 { font-size: 56px; }
+  .s-results .minis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (hover: hover) { .chip:hover, .seg:hover, .tile:hover, .mini:hover, .row:hover, .pill:hover, .ghost:hover { filter: brightness(0.96); } .card:hover { box-shadow: 8px 8px 0 var(--ink); } }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(36px, 10vw, 46px); line-height: 1.02; }
+h2 { font-size: 22px; line-height: 1.1; }
+p { margin: 0; }
+a { color: var(--blue); }
+button { font: inherit; color: var(--ink); cursor: pointer; }
+button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font-family: var(--display); font-size: 26px; background: none; border: 0; padding: 0; }
+.step { font-size: 13px; font-weight: 700; }
+.back { background: none; border: 0; padding: 0; min-height: 44px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.label { font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); }
+.chip[aria-pressed="true"] { background: var(--sun); font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.seg { min-height: 50px; border-radius: 14px; border: 2px solid var(--ink); background: var(--paper); }
+.seg[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 700; }
+.tile { min-height: 82px; padding: 12px 14px; text-align: left; border-radius: 18px; border: 2px solid var(--ink); background: var(--paper); display: flex; flex-direction: column; gap: 2px; }
+.tile b { font-family: var(--display); font-weight: 400; font-size: 19px; line-height: 1.1; }
+.tile span { font-size: 13px; }
+.tile[aria-pressed="true"] { box-shadow: 4px 4px 0 var(--ink); }
+.tile[aria-pressed="true"]:nth-child(3n+1) { background: var(--mint); }
+.tile[aria-pressed="true"]:nth-child(3n+2) { background: var(--sun); }
+.tile[aria-pressed="true"]:nth-child(3n) { background: var(--lilac); }
+.cta { min-height: 56px; border-radius: 16px; border: 0; background: var(--ink); color: var(--paper); font-weight: 700; font-size: 17px; width: 100%; }
+.ghost { min-height: 48px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); font-weight: 700; width: 100%; }
+.selects { display: flex; gap: 8px; flex-wrap: wrap; }
+input { font: inherit; font-size: 16px; flex: 1; min-width: 0; min-height: 48px; padding: 0 12px; border-radius: 12px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); }
+.startform { display: flex; flex-direction: column; gap: 8px; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+select { font: inherit; font-size: 16px; min-height: 48px; padding: 0 12px; border-radius: 12px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); }
+.summary { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { padding: 6px 12px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); font-size: 13px; font-weight: 700; }
+.pill.edit { border-style: dashed; font-weight: 500; }
+.hero { position: relative; }
+.sun { position: absolute; right: 0; top: -6px; width: 80px; height: 80px; transform: rotate(12deg); }
+.card { position: relative; background: var(--paper); border: 3px solid var(--ink); border-radius: 24px; box-shadow: 6px 6px 0 var(--ink); padding: 22px 20px 18px; display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; }
+.badge { position: absolute; top: -15px; left: 18px; padding: 6px 12px; border-radius: 10px; background: var(--blue); color: var(--paper); font-weight: 700; font-size: 13px; transform: rotate(-3deg); }
+.card h3 { font-size: 30px; line-height: 1.05; }
+.pricebig { font-family: var(--display); font-size: 40px; color: var(--price); line-height: 1; }
+.pricerow { display: flex; align-items: center; gap: 12px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; font-weight: 700; }
+.tag { padding: 4px 10px; border-radius: 8px; background: var(--lilac); }
+.tag.time { background: #FFE9A8; }
+.tag.ok { background: #CFF3EA; }
+.score { font-size: 13px; font-weight: 700; }
+.minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mini { text-align: left; border: 2px solid var(--ink); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mini:nth-child(4n+1) { background: var(--mint); transform: rotate(-1.2deg); }
+.mini:nth-child(4n+2) { background: var(--sun); transform: rotate(1.2deg); }
+.mini:nth-child(4n+3) { background: var(--paper); transform: rotate(0.8deg); }
+.mini:nth-child(4n) { background: var(--lilac); transform: rotate(-0.8deg); }
+.mini .p { font-family: var(--display); font-size: 24px; }
+.mini .n { font-weight: 700; }
+.mini .s { font-size: 13px; }
+.list { list-style: none; margin: 0; padding: 0; background: var(--paper); border: 2px solid var(--ink); border-radius: 18px; overflow: hidden; }
+.list li + li { border-top: 1px solid #E8E3DA; }
+.row { width: 100%; text-align: left; background: none; border: 0; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; }
+.row .n { font-weight: 700; }
+.row .s { font-size: 13px; color: var(--muted); }
+.row .why { font-size: 13px; font-weight: 700; color: var(--price); }
+.row .p { font-family: var(--display); font-size: 20px; text-align: right; }
+.note { padding: 12px 14px; border-radius: 14px; background: var(--blush); border: 2px dashed var(--ink); font-size: 14px; }
+.warn { padding: 10px 14px; border-radius: 14px; background: var(--sun); border: 2px solid var(--ink); font-size: 14px; }
+.empty { background: var(--paper); border: 3px solid var(--ink); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.deals { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.deals li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.deals li span:last-child { flex: none; font-family: var(--display); font-size: 19px; color: var(--price); }
+.today { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--sun); margin-left: 6px; }
+details summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.mapbox { background: #FFF4E8; border: 3px solid var(--ink); border-radius: 24px; box-shadow: 6px 6px 0 var(--ink); overflow: hidden; }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; font-weight: 700; }
+.dot { display: inline-block; width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--ink); vertical-align: -2px; margin-right: 6px; }
+.foot { font-size: 12px; color: var(--muted); text-align: center; }
+.leaf { height: 400px; width: 100%; background: #F2EEE6; }
+.leaf-e { height: 520px; }
+@media (min-width: 960px) { .s-map .leaf { height: 620px; } }
+.lpin-wrap { background: none; border: 0; }
+.lpin { display: flex; align-items: center; justify-content: center; border: 2.5px solid #1A1440; border-radius: 999px; box-sizing: border-box; font: 700 12px/1 var(--body); box-shadow: 0 1px 2px rgba(26,20,64,0.3); }
+.lpin.ring { box-shadow: 0 0 0 3px #FFF4E8, 0 0 0 6px #1B2F9E; }
+.lstart { display: block; width: 20px; height: 20px; border-radius: 5px; background: #1B2F9E; border: 2.5px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+.leaflet-tooltip.ltip { font: 700 12.5px var(--body); color: #1A1440; border: 2px solid #1A1440; border-radius: 8px; box-shadow: none; padding: 3px 8px; }
+.leaflet-tooltip.ltip-route { color: #1B2F9E; border-color: #1B2F9E; }
+.leaflet-container a { color: var(--blue); }
+@media (prefers-reduced-motion: reduce) { .mini { transform: none !important; } }
+</style>
+
+<div class="app" id="app"></div>
+
+<script>
+__DATA__
+</script>
+<script>
+(function () {
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const HOODS = ['East Austin', 'South Lamar', 'South Congress', 'Zilker'];
+  const VIBES = [
+    { id: 'patio', label: 'Patio', sub: 'Sun on my face' },
+    { id: 'music', label: 'Live music', sub: 'Band or DJ' },
+    { id: 'sports', label: 'Game on', sub: 'Sports on TV' },
+    { id: 'dogs', label: 'Dogs welcome', sub: 'Bringing my pup' },
+    { id: 'food', label: 'Snacks too', sub: 'Food deals' },
+    { id: 'resv', label: 'Can book a table', sub: 'Takes reservations' }
+  ];
+  const VIBE_WHY = { patio: 'patio', music: 'live music', sports: 'sports on TV', dogs: 'dogs welcome', food: 'food deals', resv: 'takes reservations' };
+  const PRICES = [{ v: 5, l: '$5' }, { v: 8, l: '$8' }, { v: 10, l: '$10' }, { v: null, l: 'Any' }];
+  const GROUPS = ['1-2', '3-6', '7+'];
+
+  // Street geometry and address anchors, approximate (about 50-100 ft). Real tiles replace this in the Netlify build.
+  const ANCHORS = {
+    'S Lamar Blvd': [[0, 30.2668, -97.7535], [100, 30.2647, -97.7562], [424, 30.2613, -97.7588], [615, 30.2586, -97.7590], [1109, 30.2550, -97.7619], [1300, 30.2538, -97.7633], [1901, 30.2494, -97.7669], [2034, 30.2493, -97.7688], [2115, 30.2477, -97.7714], [3121, 30.2413, -97.7850], [3508, 30.2402, -97.7885], [3909, 30.2367, -97.7909]],
+    'S Congress Ave': [[0, 30.2614, -97.7452], [100, 30.2595, -97.7457], [1011, 30.2533, -97.7480], [1321, 30.2503, -97.7491], [1722, 30.2463, -97.7512], [2336, 30.2392, -97.7536], [2510, 30.2381, -97.7561], [3116, 30.2313, -97.7596], [3801, 30.2268, -97.7614], [4720, 30.2143, -97.7699]],
+    'E 6th St': [[0, 30.2686, -97.7426], [204, 30.2677, -97.7411], [404, 30.2671, -97.7390], [700, 30.2660, -97.7360], [1200, 30.2645, -97.7303], [1410, 30.2637, -97.7277], [1618, 30.2627, -97.7251], [1816, 30.2619, -97.7227], [2500, 30.2590, -97.7145]],
+    'Barton Springs Rd': [[100, 30.2595, -97.7468], [306, 30.2590, -97.7482], [1025, 30.2601, -97.7556], [1500, 30.2617, -97.7600], [1608, 30.2624, -97.7617], [1728, 30.2639, -97.7633], [2201, 30.2655, -97.7690]]
+  };
+  const STREET_KEYS = [['lamar', 'S Lamar Blvd'], ['congress', 'S Congress Ave'], ['soco', 'S Congress Ave'], ['6th', 'E 6th St'], ['sixth', 'E 6th St'], ['barton springs', 'Barton Springs Rd']];
+  const LINES = [
+    { name: 'Lady Bird Lake', kind: 'water', pts: [[30.2790, -97.7930], [30.2760, -97.7840], [30.2720, -97.7760], [30.2690, -97.7650], [30.2668, -97.7545], [30.2640, -97.7490], [30.2612, -97.7448], [30.2565, -97.7398], [30.2500, -97.7365], [30.2470, -97.7290], [30.2490, -97.7200], [30.2500, -97.7120]] },
+    { name: 'S Lamar', kind: 'main', pts: ANCHORS['S Lamar Blvd'].map((a) => [a[1], a[2]]).concat([[30.2330, -97.7945]]) },
+    { name: 'N Lamar', kind: 'main', pts: [[30.2668, -97.7535], [30.2720, -97.7522], [30.2800, -97.7500]] },
+    { name: 'S Congress', kind: 'main', pts: ANCHORS['S Congress Ave'].map((a) => [a[1], a[2]]).concat([[30.2046, -97.7752]]) },
+    { name: 'Congress Ave', kind: 'main', pts: [[30.2614, -97.7452], [30.2686, -97.7426], [30.2747, -97.7404]] },
+    { name: 'E 6th', kind: 'main', pts: [[30.2700, -97.7470]].concat(ANCHORS['E 6th St'].map((a) => [a[1], a[2]])) },
+    { name: 'Barton Springs Rd', kind: 'main', pts: [[30.2600, -97.7462]].concat(ANCHORS['Barton Springs Rd'].map((a) => [a[1], a[2]]), [[30.2668, -97.7720]]) },
+    { name: 'Riverside Dr', kind: 'minor', pts: [[30.2655, -97.7560], [30.2622, -97.7505], [30.2595, -97.7460], [30.2560, -97.7420], [30.2490, -97.7380], [30.2420, -97.7300]] },
+    { name: 'Cesar Chavez', kind: 'minor', pts: [[30.2690, -97.7560], [30.2660, -97.7480], [30.2630, -97.7446], [30.2610, -97.7390], [30.2600, -97.7300], [30.2560, -97.7200]] },
+    { name: 'Oltorf', kind: 'minor', pts: [[30.2470, -97.7840], [30.2445, -97.7779], [30.2400, -97.7640], [30.2365, -97.7550], [30.2330, -97.7440]] },
+    { name: 'I-35', kind: 'highway', pts: [[30.2900, -97.7270], [30.2760, -97.7320], [30.2662, -97.7362], [30.2600, -97.7385], [30.2500, -97.7372], [30.2400, -97.7420], [30.2250, -97.7520], [30.2050, -97.7620]] },
+    { name: 'MoPac', kind: 'highway', pts: [[30.2900, -97.7740], [30.2780, -97.7790], [30.2653, -97.7812], [30.2500, -97.7900], [30.2300, -97.8000]] }
+  ];
+  const PARK = [[30.2700, -97.7760], [30.2705, -97.7700], [30.2675, -97.7650], [30.2645, -97.7665], [30.2625, -97.7710], [30.2640, -97.7765]];
+  const PLACES = [
+    ['Zilker Park', 30.2669, -97.7729], ['Barton Springs Pool', 30.2640, -97.7713], ['Congress Ave Bridge', 30.2614, -97.7452], ['Texas Capitol', 30.2747, -97.7404],
+    ['Rainey Street', 30.2592, -97.7389], ['Auditorium Shores', 30.2626, -97.7517], ['Long Center', 30.2600, -97.7511], ['Palmer Events Center', 30.2593, -97.7536],
+    ['Butler Park', 30.2608, -97.7565], ['ACL Live / Moody Theater', 30.2654, -97.7477], ['Whole Foods (Lamar)', 30.2707, -97.7533], ['Austin City Hall', 30.2648, -97.7472], ['Plaza Saltillo', 30.2620, -97.7277],
+    ['Lamar & Barton Springs', 30.2618, -97.7583], ['Lamar & Riverside', 30.2649, -97.7557], ['Lamar & Bluebonnet', 30.2475, -97.7720], ['Lamar & Oltorf', 30.2445, -97.7779],
+    ['Congress & Cesar Chavez', 30.2629, -97.7446], ['Congress & 6th', 30.2686, -97.7426], ['Congress & Riverside', 30.2591, -97.7458], ['Congress & Barton Springs', 30.2597, -97.7466], ['Congress & Elizabeth', 30.2497, -97.7493], ['Congress & Oltorf', 30.2365, -97.7550],
+    ['6th & I-35', 30.2662, -97.7362], ['6th & Waller', 30.2643, -97.7301], ['6th & Chicon', 30.2622, -97.7240], ['6th & Pleasant Valley', 30.2590, -97.7142], ['Barton Springs & S 1st', 30.2598, -97.7513]
+  ];
+  const norm = (s) => String(s).toLowerCase().replace(/&/g, ' and ').replace(/\bat\b|\+|\//g, ' and ').replace(/\b(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|s|south|e|east|n|north|w|west|the)\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  function streetKey(text) { const t = text.toLowerCase(); const hit = STREET_KEYS.find((k) => t.indexOf(k[0]) >= 0); return hit ? hit[1] : null; }
+  function interp(street, n) {
+    const a = ANCHORS[street]; if (n < a[0][0] || n > a[a.length - 1][0] + 300) return null;
+    for (let i = 0; i < a.length - 1; i++) { if (n <= a[i + 1][0]) { const f = (n - a[i][0]) / (a[i + 1][0] - a[i][0]); return [a[i][1] + f * (a[i + 1][1] - a[i][1]), a[i][2] + f * (a[i + 1][2] - a[i][2])]; } }
+    return [a[a.length - 1][1], a[a.length - 1][2]];
+  }
+  // Resolve typed text: venue name, landmark, cross streets, or "1234 S Lamar".
+  function geocode(raw) {
+    const text = raw.trim(); if (!text) return null;
+    const m = text.match(/^(\d{2,5})\s+(.+)$/);
+    if (m) { const st = streetKey(m[2]); if (st) { const p = interp(st, +m[1]); if (p) return { label: m[1] + ' ' + st, lat: p[0], lng: p[1] }; return { error: 'That number is past the part of ' + st + ' this preview knows (up to ' + ANCHORS[st][ANCHORS[st].length - 1][0] + ').' }; } }
+    const q = norm(text);
+    const v = VENUES.find((x) => norm(x.name) === q || norm(x.name).indexOf(q) >= 0 && q.length > 3);
+    if (v) return { label: v.name, lat: v.lat, lng: v.lng };
+    const words = q.split(' and ').map((w) => w.trim()).filter(Boolean);
+    let best = null, bestScore = 0;
+    PLACES.forEach((p) => {
+      const pn = norm(p[0]);
+      let s = pn === q ? 10 : 0;
+      if (!s && words.length > 1) s = words.every((w) => pn.indexOf(w) >= 0) ? 8 : 0;
+      if (!s && q.length > 3 && pn.indexOf(q) >= 0) s = 6;
+      if (s > bestScore) { bestScore = s; best = p; }
+    });
+    if (best) return { label: best[0], lat: best[1], lng: best[2] };
+    return { error: 'Couldn\'t find "' + text + '". Try a landmark (Zilker Park), cross streets (Lamar & Oltorf), or an address on Lamar, Congress, E 6th or Barton Springs.' };
+  }
+
+  // Distances and travel estimates: street factor 1.3, walking 80 m/min, city driving 400 m/min + 4 min to park.
+  function meters(a, b) { const R = 6371000, r = Math.PI / 180, dLa = (b.lat - a.lat) * r, dLo = (b.lng - a.lng) * r; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+  function travel(a, b) { const d = meters(a, b) * 1.3; const walk = Math.max(1, Math.round(d / 80)); return { walk: walk, drive: Math.round(d / 400) + 4, miles: d / 1609 }; }
+  function travelText(tr) { return tr.walk <= 20 ? tr.walk + ' min walk' : tr.walk + ' min walk or about ' + tr.drive + ' min by car'; }
+  function gmaps(origin, dest, stops) {
+    const enc = (p) => encodeURIComponent(p.lat.toFixed(5) + ',' + p.lng.toFixed(5));
+    const total = stops ? stops.length : 0;
+    const longHop = origin && dest && travel(origin, dest).walk > 20;
+    let u = 'https://www.google.com/maps/dir/?api=1&destination=' + enc(dest) + '&travelmode=' + (longHop && !stops ? 'driving' : 'walking');
+    if (origin) u += '&origin=' + enc(origin);
+    if (total) u += '&waypoints=' + stops.map(enc).join('%7C');
+    return u;
+  }
+  function amaps(origin, dest) { let u = 'https://maps.apple.com/?daddr=' + dest.lat.toFixed(5) + ',' + dest.lng.toFixed(5) + '&dirflg=' + (origin && travel(origin, dest).walk > 20 ? 'd' : 'w'); if (origin) u += '&saddr=' + origin.lat.toFixed(5) + ',' + origin.lng.toFixed(5); return u; }
+
+  function austinNow() {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+    const get = (t) => parts.find((p) => p.type === t).value;
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'));
+    let h = parseInt(get('hour'), 10); if (h === 24) h = 0;
+    return { day: day, min: h * 60 + parseInt(get('minute'), 10) };
+  }
+  const NOW = austinNow();
+  const USE_LEAFLET = !!(window.HYA_SITE && window.L);
+  const MAPS = [], PENDING = [];
+
+  const S = {
+    screen: 'start', prev: [],
+    hoods: ['East Austin'],
+    when: 'now', day: NOW.day, min: Math.min(Math.max(Math.round(NOW.min / 30) * 30, 660), 1380),
+    vibes: { patio: true }, price: 5, group: '3-6',
+    venue: null, start: null, startError: null, mapMode: 'pick', focus: null
+  };
+  try { const saved = JSON.parse(localStorage.getItem('hya-choices') || 'null'); if (saved) Object.assign(S, saved, { screen: 'start', prev: [], venue: null, day: NOW.day }); } catch (e) {}
+  if (!Array.isArray(S.hoods) || !S.hoods.length) S.hoods = S.hood === 'all' ? HOODS.slice() : [S.hood || 'East Austin'];
+  delete S.hood;
+  S.hoods = S.hoods.filter((h) => HOODS.indexOf(h) >= 0); if (!S.hoods.length) S.hoods = ['East Austin'];
+  const inArea = (v) => S.hoods.indexOf(v.hood) >= 0;
+  function hoodText() { return S.hoods.length === HOODS.length ? 'All 4 neighborhoods' : S.hoods.join(' + '); }
+  function save() { try { localStorage.setItem('hya-choices', JSON.stringify({ hoods: S.hoods, when: S.when, min: S.min, vibes: S.vibes, price: S.price, group: S.group, start: S.start, mapMode: S.mapMode })); } catch (e) {} }
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  function clock(min) { if (min >= 1439) return 'close'; let h = Math.floor(min / 60), m = min % 60; const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12; return h + (m ? ':' + String(m).padStart(2, '0') : '') + ap; }
+  function dur(m) { const h = Math.floor(m / 60), r = m % 60; return h ? h + 'h' + (r ? ' ' + r + 'm' : '') : r + 'm'; }
+  const money = (n) => '$' + (Number.isInteger(n) ? n : n.toFixed(2));
+  function target() { return S.when === 'now' ? { day: NOW.day, min: NOW.min } : { day: S.day, min: S.min }; }
+
+  function dayList(days) {
+    const k = days.join(',');
+    if (k === '0,1,2,3,4,5,6') return 'Every day';
+    if (k === '1,2,3,4,5') return 'Mon-Fri';
+    if (k === '1,2,3,4') return 'Mon-Thu';
+    if (k === '2,3,4,5') return 'Tue-Fri';
+    if (k === '2,3,4') return 'Tue-Thu';
+    return days.map((d) => DAYS[d].slice(0, 3)).join(', ');
+  }
+  function hoursText(v) {
+    if (!v.w.length) return 'Times not confirmed';
+    return v.w.map((w) => dayList(w[0]) + ', ' + clock(toMin(w[1])) + ' to ' + clock(toMin(w[2]))).join(' · ');
+  }
+  function cheapFor(v, day) { return Object.prototype.hasOwnProperty.call(v.cheapByDay, String(day)) ? v.cheapByDay[String(day)] : v.cheap; }
+  function dealsFor(v, day) { return (v.dayDeals[String(day)] || []).map((d) => [d[0], d[1], true]).concat(v.deals.map((d) => [d[0], d[1], false])); }
+
+  // Time status for the chosen moment: on, ends soon, starts soon, or off.
+  function timeStatus(v, t) {
+    if (!v.w.length) return { kind: 'unknown' };
+    let best = null;
+    v.w.forEach((w) => {
+      if (w[0].indexOf(t.day) < 0) return;
+      const s = toMin(w[1]), e = toMin(w[2]);
+      if (t.min >= s && t.min < e) { const left = e - t.min; const k = left >= 30 ? 'on' : 'ending'; if (!best || best.kind !== 'on') best = { kind: k, left: left, end: e }; }
+      else if (t.min < s && s - t.min <= 60 && !best) best = { kind: 'soon', wait: s - t.min, start: s };
+    });
+    return best || { kind: 'off' };
+  }
+
+  function evaluate(v) {
+    const t = target();
+    const ts = timeStatus(v, t);
+    const cheap = cheapFor(v, t.day);
+    const misses = [];
+    if (ts.kind === 'unknown') return { v: v, bucket: 'unknown' };
+    if (ts.kind === 'off') return { v: v, bucket: 'off' };
+    if (ts.kind === 'ending') misses.push('ends in ' + ts.left + ' min');
+    if (ts.kind === 'soon') misses.push('starts in ' + dur(ts.wait));
+    if (S.price != null) {
+      if (cheap == null) misses.push('prices not posted');
+      else if (cheap > S.price) misses.push('cheapest drink is ' + money(cheap));
+    }
+    const wanted = Object.keys(S.vibes).filter((k) => S.vibes[k]);
+    if (S.group === '7+' && wanted.indexOf('resv') < 0) wanted.push('resv');
+    const hits = wanted.filter((k) => v[k] === true);
+    const fit = wanted.length ? hits.length / wanted.length : 1;
+    let dv = cheap == null ? 0.25 : Math.max(0, Math.min(1, (9 - cheap) / 7));
+    if (dealsFor(v, t.day).length >= 3) dv = Math.min(1, dv + 0.1);
+    // With a start point: 45% fit + 30% deal + 25% closeness (full credit within a 5 min walk, none at 40+ min).
+    const walk = S.start ? travel(S.start, v).walk : null;
+    const prox = walk == null ? 0 : Math.max(0, Math.min(1, (40 - walk) / 35));
+    let score = Math.round(walk == null ? 60 * fit + 40 * dv : 45 * fit + 30 * dv + 25 * prox) - (v.conf === 'low' ? 6 : 0);
+    const why = [];
+    if (cheap != null) why.push(money(cheap) + ' drinks');
+    hits.slice(0, 3).forEach((k) => why.push(VIBE_WHY[k]));
+    if (walk != null && walk <= 15) why.unshift(walk + ' min walk');
+    if (ts.kind === 'on') why.push(dur(ts.left) + ' left');
+    const missingVibes = wanted.filter((k) => v[k] !== true).map((k) => (v[k] === false ? 'no ' : '') + VIBE_WHY[k] + (v[k] == null ? ' not confirmed' : ''));
+    return { v: v, bucket: misses.length === 0 ? 'match' : (misses.length === 1 ? 'close' : 'off'), misses: misses, score: Math.max(0, score), why: why, ts: ts, cheap: cheap, missingVibes: missingVibes };
+  }
+
+  function results() {
+    const pool = VENUES.filter(inArea);
+    const ev = pool.map(evaluate);
+    const by = (b) => ev.filter((e) => e.bucket === b).sort((a, c) => c.score - a.score);
+    return { matches: by('match'), close: by('close'), unknown: ev.filter((e) => e.bucket === 'unknown'), total: pool.length };
+  }
+
+  const app = document.getElementById('app');
+  function go(screen, extra) { S.prev.push({ screen: S.screen, venue: S.venue }); S.screen = screen; if (extra) Object.assign(S, extra); save(); render(); window.scrollTo(0, 0); }
+  function back() { const p = S.prev.pop() || { screen: 'start' }; S.screen = p.screen; S.venue = p.venue; render(); window.scrollTo(0, 0); }
+
+  const SUN = '<svg class="sun" viewBox="0 0 92 92" aria-hidden="true"><circle cx="46" cy="46" r="26" fill="#FFD23F" stroke="#1A1440" stroke-width="3"/><g stroke="#1A1440" stroke-width="3" stroke-linecap="round"><path d="M46 6v10M46 76v10M6 46h10M76 46h10M18 18l7 7M67 67l7 7M18 74l7-7M67 25l7-7"/></g></svg>';
+  function header(right) { return '<header class="top"><button type="button" class="logo" data-act="home">hey y\'all</button>' + (right || '') + '</header>'; }
+  function backHeader(label, right) { return '<header class="top"><button type="button" class="back" data-act="back">' + esc(label) + '</button>' + (right || '') + '</header>'; }
+  const pressed = (b) => ' aria-pressed="' + (b ? 'true' : 'false') + '"';
+  function whenText() { const t = target(); return S.when === 'now' ? 'Right now (' + DAYS[t.day].slice(0, 3) + ' ' + clock(t.min) + ')' : DAYS[t.day].slice(0, 3) + ' ' + clock(t.min); }
+
+  function startForm() {
+    const opts = PLACES.map((p) => p[0]).concat(VENUES.map((v) => v.name)).map((n) => '<option value="' + esc(n) + '"></option>').join('');
+    return '<form class="startform" id="startform" autocomplete="off"><label class="label" for="startq">Starting from <span style="font-weight:500">(optional)</span></label>' +
+      '<div class="selects"><input id="startq" list="startlist" placeholder="1500 S Congress, Lamar & Oltorf, Zilker Park" value="' + esc(S.start ? S.start.label : '') + '"><button type="submit" class="seg" style="padding:0 18px">Set</button></div>' +
+      '<datalist id="startlist">' + opts + '</datalist>' +
+      (S.start ? '<p class="score">Starting from <strong>' + esc(S.start.label) + '</strong> · <button type="button" class="back" data-act="clearstart" style="min-height:0">clear</button></p>' : '') +
+      (USE_LEAFLET && navigator.geolocation ? '<button type="button" class="ghost" data-act="locate">' + (S.locating ? 'Finding you…' : 'Use my location') + '</button>' : '') +
+      (S.startError ? '<p class="score" role="alert" style="color:var(--price)">' + esc(S.startError) + '</p>' : '') + '</form>';
+  }
+  const fromStart = (v) => S.start ? travelText(travel(S.start, v)) + ' from ' + S.start.label : '';
+
+  // Bar-hop: up to 4 matches, nearest-next order from the start (or from the #1 pick), 45 min per stop.
+  function windowEnd(v, day, min) { let end = null; v.w.forEach((w) => { if (w[0].indexOf(day) >= 0) { const s = toMin(w[1]), e = toMin(w[2]); if (min >= s - 60 && min < e) end = e; } }); return end; }
+  function hopPlan(matches) {
+    if (!matches.length) return null;
+    const t = target(), all = matches.map((e) => e.v), legs = [];
+    let cur = S.start, clockMin = t.min, totalWalk = 0;
+    const legTo = (v) => { const tr = cur ? travel(cur, v) : null; const arrive = clockMin + (tr ? (tr.walk <= 20 ? tr.walk : tr.drive) : 0); const end = windowEnd(v, t.day, arrive); return { v: v, tr: tr, arrive: arrive, end: end, late: end == null || arrive > end - 15 }; };
+    // First stop: the #1 pick when there is no start point, otherwise the closest match still pouring on arrival.
+    let first = cur ? all.map(legTo).filter((l) => !l.late).sort((a, b) => a.tr.walk - b.tr.walk)[0] : legTo(all[0]);
+    if (!first) first = legTo(all[0]);
+    while (first && legs.length < 4) {
+      legs.push(first); if (first.tr) totalWalk += first.tr.walk;
+      cur = first.v; clockMin = first.arrive + 45;
+      // Next stop: closest match within a 20 min walk that is still pouring when you get there.
+      first = all.filter((v) => !legs.some((l) => l.v === v)).map(legTo).filter((l) => l.tr.walk <= 20 && !l.late).sort((a, b) => a.tr.walk - b.tr.walk)[0];
+    }
+    return { legs: legs, totalWalk: totalWalk };
+  }
+
+  function timeOptions() { let o = ''; for (let m = 660; m <= 1380; m += 30) o += '<option value="' + m + '"' + (m === S.min ? ' selected' : '') + '>' + clock(m) + '</option>'; return o; }
+  function dayOptions() { return DAYS.map((d, i) => '<option value="' + i + '"' + (i === S.day ? ' selected' : '') + '>' + d + '</option>').join(''); }
+
+  function viewStart() {
+    return header('<span class="step">Step 1 of 2</span>') +
+      '<h1>Where we<br>drinkin\'?</h1>' +
+      '<div class="chips" role="group" aria-label="Neighborhood">' +
+      HOODS.map((h) => '<button type="button" class="chip" data-hood="' + esc(h) + '"' + pressed(S.hoods.indexOf(h) >= 0) + '>' + esc(h) + '</button>').join('') +
+      '<button type="button" class="chip" data-hood="all"' + pressed(S.hoods.length === HOODS.length) + '>All 4</button></div>' +
+      '<p class="score" id="hoodnote">Pick one or more. ' + S.hoods.length + ' selected · ' + VENUES.filter(inArea).length + ' spots.</p>' +
+      '<p class="label">When?</p>' +
+      '<div class="grid2" role="group" aria-label="When">' +
+      '<button type="button" class="seg" data-when="now"' + pressed(S.when === 'now') + '>Right now</button>' +
+      '<button type="button" class="seg" data-when="pick"' + pressed(S.when === 'pick') + '>Pick a time</button></div>' +
+      (S.when === 'pick' ? '<div class="selects"><label class="label" for="day">Day</label><select id="day">' + dayOptions() + '</select><label class="label" for="time">Time</label><select id="time">' + timeOptions() + '</select></div>' : '<p>It\'s ' + DAYS[NOW.day] + ', ' + clock(NOW.min) + ' in Austin.</p>') +
+      startForm() +
+      '<button type="button" class="cta" data-go="vibe">Next: pick your vibe</button>' +
+      '<button type="button" class="ghost" data-go="results">Skip, just show me deals</button>' +
+      '<p class="foot">Covers ' + VENUES.length + ' happy hours in East Austin, South Lamar, South Congress and Zilker. Checked Oct 13-14, 2026.</p>';
+  }
+
+  function viewVibe() {
+    return backHeader('Back', '<span class="step">Step 2 of 2</span>') +
+      '<h1>What\'s the vibe?</h1><p>Pick as many as you like. These rank results; they don\'t hide any.</p>' +
+      '<div class="grid2" role="group" aria-label="Vibes">' +
+      VIBES.map((v) => '<button type="button" class="tile" data-vibe="' + v.id + '"' + pressed(!!S.vibes[v.id]) + '><b>' + esc(v.label) + '</b><span>' + (S.vibes[v.id] ? 'Picked' : esc(v.sub)) + '</span></button>').join('') + '</div>' +
+      '<p class="label">Most I\'ll pay for a drink</p><div class="grid4" role="group" aria-label="Max drink price">' +
+      PRICES.map((p) => '<button type="button" class="seg" data-price="' + (p.v == null ? 'any' : p.v) + '"' + pressed(S.price === p.v) + '>' + p.l + '</button>').join('') + '</div>' +
+      '<p class="label">How many of y\'all?</p><div class="grid3" role="group" aria-label="Group size">' +
+      GROUPS.map((g) => '<button type="button" class="seg" data-group="' + g + '"' + pressed(S.group === g) + '>' + g + '</button>').join('') + '</div>' +
+      '<button type="button" class="cta" data-go="results">Find my match</button>';
+  }
+
+  function summaryPills() {
+    const vibes = VIBES.filter((v) => S.vibes[v.id]).map((v) => v.label);
+    return '<div class="summary">' +
+      '<button type="button" class="pill" data-go="start">' + esc(hoodText()) + '</button>' +
+      '<button type="button" class="pill" data-go="start">' + esc(whenText()) + '</button>' +
+      '<button type="button" class="pill" data-go="vibe">' + (S.price == null ? 'Any price' : 'Under ' + money(S.price)) + '</button>' +
+      vibes.map((l) => '<button type="button" class="pill" data-go="vibe">' + esc(l) + '</button>').join('') +
+      '<button type="button" class="pill edit" data-go="vibe">+ edit vibe</button></div>';
+  }
+
+  function tagsFor(e) {
+    const v = e.v, out = [];
+    if (e.ts.kind === 'on') out.push('<span class="tag time">Until ' + clock(e.ts.end) + '</span>');
+    if (v.patio) out.push('<span class="tag ok">Patio</span>');
+    if (v.dogs) out.push('<span class="tag ok">Dogs OK</span>');
+    out.push('<span class="tag">' + esc(v.hood) + '</span>');
+    return '<div class="tags">' + out.join('') + '</div>';
+  }
+  function topDeal(v, day) { const d = dealsFor(v, day); return d.length ? d.slice(0, 2).map((x) => x[0] + ' ' + x[1]).join(' · ') : (v.note || 'Deals not posted yet'); }
+
+  function viewResults() {
+    const r = results(), t = target();
+    let h = header('<button type="button" class="pill" data-go="map">Map</button>');
+    const first = r.matches[0];
+    h += '<section class="hero"><h1>' + (first ? (S.when === 'now' ? 'It\'s ' + clock(t.min) + '.<br>' : DAYS[t.day] + ',<br>' + clock(t.min) + '.<br>') + (r.matches.length === 1 ? '1 spot' : r.matches.length + ' spots') + '<br>for you.' : 'Nothing<br>pouring.') + '</h1>' + SUN + '</section>';
+    h += summaryPills();
+    if (first) {
+      h += '<button type="button" class="card" data-venue="' + first.v.id + '"><span class="badge">Your #1 match · ' + first.score + '/100</span>' +
+        '<h3>' + esc(first.v.name) + '</h3>' +
+        '<div class="pricerow"><span class="pricebig">' + (first.cheap != null ? money(first.cheap) : '?') + '</span><span>' + esc(topDeal(first.v, t.day)) + '</span></div>' +
+        '<p><strong>Why:</strong> ' + esc(first.why.join(', ')) + '.</p>' +
+        (first.missingVibes.length ? '<p class="score">Missing: ' + esc(first.missingVibes.join(', ')) + '</p>' : '') +
+        tagsFor(first) + (S.start ? '<p class="score">' + esc(fromStart(first.v)) + '</p>' : '') + '</button>';
+    } else {
+      h += '<div class="empty"><h2>No exact matches</h2><p>' + (S.when === 'now' ? 'No happy hours are on right now in ' + hoodText() + '. Most run between 2pm and 7pm.' : 'Nothing matches that time and price.') + '</p><button type="button" class="ghost" data-act="pick5">Try today at 5pm</button></div>';
+    }
+    const rest = r.matches.slice(1);
+    if (rest.length) {
+      h += '<h2>Also great</h2><div class="minis">' + rest.slice(0, 6).map((e) =>
+        '<button type="button" class="mini" data-venue="' + e.v.id + '"><span class="p">' + (e.cheap != null ? money(e.cheap) : '?') + '</span><span class="n">' + esc(e.v.name) + '</span><span class="s">' + esc(e.why.slice(1, 3).join(', ') || e.v.hood) + '</span><span class="s">' + (S.start ? travel(S.start, e.v).walk + ' min walk · ' : '') + e.score + '/100</span></button>').join('') + '</div>';
+      if (rest.length > 6) h += '<ul class="list">' + rest.slice(6).map(rowHtml).join('') + '</ul>';
+    }
+    if (r.close.length) h += '<h2>Close matches</h2><ul class="list">' + r.close.map((e) => rowHtml(e, true)).join('') + '</ul>';
+    if (r.unknown.length) h += '<details><summary>Not enough info yet (' + r.unknown.length + ')</summary><ul class="list">' + r.unknown.map((e) => '<li><button type="button" class="row" data-venue="' + e.v.id + '"><span class="n">' + esc(e.v.name) + '</span><span class="p">?</span><span class="s">' + esc(e.v.warn || 'Times not confirmed') + '</span></button></li>').join('') + '</ul></details>';
+    h += '<div class="grid2"><button type="button" class="ghost" data-go="map" data-mode="pick">See all ' + r.total + ' on the map</button><button type="button" class="ghost" data-go="map" data-mode="hop"' + (r.matches.length < 2 ? ' disabled' : '') + '>Plan a bar hop</button></div>';
+    h += '<p class="foot">' + (S.start ? 'Score = 45% vibe fit + 30% deal + 25% how close it is to ' + esc(S.start.label) + '.' : 'Score = 60% vibe fit + 40% deal. Add a starting point to factor in distance.') + '</p>';
+    return '<div class="main">' + h + '</div><aside class="side" aria-label="Map preview"><h2>On the map</h2>' + viewMap(true) + '<button type="button" class="ghost" data-go="map" data-mode="pick">Open full map and directions</button></aside>';
+  }
+  function rowHtml(e, close) {
+    return '<li><button type="button" class="row" data-venue="' + e.v.id + '"><span class="n">' + esc(e.v.name) + '</span><span class="p">' + (e.cheap != null ? money(e.cheap) : '?') + '</span>' +
+      (close ? '<span class="why">Close: ' + esc(e.misses[0]) + '</span>' : '<span class="s">' + esc(e.why.join(', ')) + '</span>') +
+      '<span class="s">' + (S.start ? travel(S.start, e.v).walk + ' min walk · ' : '') + e.score + '/100</span></button></li>';
+  }
+
+  function viewDetail() {
+    const v = VENUES.find((x) => x.id === S.venue), t = target(), e = evaluate(v);
+    const deals = dealsFor(v, t.day);
+    const status = e.bucket === 'unknown' ? 'Times not confirmed' : e.ts.kind === 'on' ? 'On ' + (S.when === 'now' ? 'now' : 'at ' + clock(t.min)) + ' · ' + dur(e.ts.left) + ' left' : e.ts.kind === 'ending' ? 'Ends in ' + e.ts.left + ' min' : e.ts.kind === 'soon' ? 'Starts in ' + dur(e.ts.wait) : 'Not on at ' + clock(t.min) + (S.when === 'now' ? '' : ' ' + DAYS[t.day].slice(0, 3));
+    const known = [], unknown = [];
+    [['patio', 'Patio'], ['dogs', 'Dogs welcome'], ['sports', 'Sports on TV'], ['music', 'Live music'], ['resv', 'Takes reservations']].forEach((p) => { if (v[p[0]] === true) known.push(p[1]); else if (v[p[0]] == null) unknown.push(p[1].toLowerCase()); });
+    const label = e.bucket === 'match' ? 'Match · ' + e.score + '/100' : e.bucket === 'close' ? 'Close: ' + e.misses[0] : v.hood;
+    return '<div class="main">' + backHeader('Back') +
+      '<section class="hero"><span class="badge" style="position:static;display:inline-block">' + esc(label) + '</span><h1 style="margin-top:10px;padding-right:84px">' + esc(v.name) + '</h1>' + SUN + '<p>' + esc(v.addr) + ' · ' + esc(v.hood) + '</p></section>' +
+      (v.warn ? '<div class="warn"><strong>Heads up:</strong> ' + esc(v.warn) + '</div>' : '') +
+      '<article class="card"><div class="top"><h2>Happy hour</h2><span class="tag time">' + esc(status) + '</span></div><p><strong>' + esc(hoursText(v)) + '</strong></p>' +
+      (v.note ? '<p>' + esc(v.note) + '</p>' : '') +
+      (deals.length ? '<ul class="deals">' + deals.map((d) => '<li><span>' + esc(d[0]) + (d[2] ? '<span class="today">' + DAYS[t.day].slice(0, 3) + ' only</span>' : '') + '</span><span>' + esc(d[1]) + '</span></li>').join('') + '</ul>' : '<div class="note"><strong>Menu not confirmed yet.</strong></div>') + '</article>' +
+      '<section><h2 style="margin-bottom:10px">The vibe</h2><div class="chips">' + known.map((k) => '<span class="pill">' + esc(k) + '</span>').join('') + (unknown.length ? '<span class="pill edit">Not confirmed: ' + esc(unknown.join(', ')) + '</span>' : '') + '</div></section>' +
+      '<div class="note">Checked Oct 13-14, 2026 via <a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.src) + '</a> · confidence: ' + esc(v.conf) + '</div>' +
+      '</div><aside class="side">' + directionsBlock(v) + nearbyBlock(v) + '</aside>';
+  }
+
+  function directionsBlock(v) {
+    return '<section class="empty"><h2>Get there</h2>' +
+      (S.start ? '<p><strong>' + esc(travelText(travel(S.start, v))) + '</strong> from ' + esc(S.start.label) + ' (estimate).</p>' : '<p>Add a starting point to see walk time and a route line.</p>') +
+      '<div class="grid2"><a class="cta" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' + gmaps(S.start, v) + '" target="_blank" rel="noopener">Google Maps</a>' +
+      '<a class="ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink)" href="' + amaps(S.start, v) + '" target="_blank" rel="noopener">Apple Maps</a></div>' +
+      '<button type="button" class="ghost" data-go="map" data-mode="pick" data-focus="' + v.id + '">See route on map</button>' +
+      (S.start ? '' : startForm()) + '</section>';
+  }
+  function nearbyBlock(v) {
+    const r = results();
+    const near = r.matches.concat(r.close).filter((e) => e.v.id !== v.id).map((e) => ({ e: e, tr: travel(v, e.v) })).sort((a, b) => a.tr.walk - b.tr.walk).slice(0, 4);
+    if (!near.length) return '';
+    return '<section><h2 style="margin-bottom:10px">Nearby matches</h2><ul class="list">' + near.map((n) =>
+      '<li><button type="button" class="row" data-venue="' + n.e.v.id + '"><span class="n">' + esc(n.e.v.name) + '</span><span class="p">' + (n.e.cheap != null ? money(n.e.cheap) : '?') + '</span>' +
+      '<span class="s">' + esc(travelText(n.tr)) + (n.e.bucket === 'close' ? ' · close: ' + esc(n.e.misses[0]) : '') + '</span><span class="s">' + n.e.score + '/100</span></button></li>').join('') + '</ul></section>';
+  }
+
+  function viewMap(embed) {
+    const r = results(), t = target();
+    const status = {}; r.matches.forEach((e, i) => { status[e.v.id] = { k: 'match', rank: i + 1 }; }); r.close.forEach((e) => { status[e.v.id] = { k: 'close' }; });
+    const pool = VENUES.filter(inArea);
+    const focus = (!embed && VENUES.find((v) => v.id === S.focus)) || (r.matches[0] && r.matches[0].v) || null;
+    const hop = !embed && S.mapMode === 'hop' ? hopPlan(r.matches) : null;
+    const pts = pool.map((v) => [v.lat, v.lng]); if (S.start) pts.push([S.start.lat, S.start.lng]);
+    let minLat = Math.min(...pts.map((p) => p[0])), maxLat = Math.max(...pts.map((p) => p[0])), minLng = Math.min(...pts.map((p) => p[1])), maxLng = Math.max(...pts.map((p) => p[1]));
+    const padLat = Math.max((maxLat - minLat) * 0.14, 0.003), padLng = Math.max((maxLng - minLng) * 0.14, 0.003);
+    minLat -= padLat; maxLat += padLat; minLng -= padLng; maxLng += padLng;
+    const W = 400, H = 460, sx = Math.cos(30.25 * Math.PI / 180);
+    const spanX = (maxLng - minLng) * sx, spanY = maxLat - minLat, k = Math.min(W / spanX, H / spanY);
+    const ox = (W - spanX * k) / 2, oy = (H - spanY * k) / 2;
+    const X = (lng) => ox + (lng - minLng) * sx * k, Y = (lat) => oy + (maxLat - lat) * k;
+    const P = (lat, lng) => X(lng).toFixed(1) + ',' + Y(lat).toFixed(1);
+    const poly = (arr) => arr.map((p) => P(p[0], p[1])).join(' ');
+    const font = 'font-family="DM Sans, sans-serif"';
+    // Base layer: park, river, highways, main streets, minor streets, labels.
+    let base = '<polygon points="' + poly(PARK) + '" fill="#8FE3CF" fill-opacity="0.45"/>';
+    const style = { water: ['#9FD3E6', 12], highway: ['#F3C3A8', 7], main: ['#FFFFFF', 6], minor: ['#FFFFFF', 3.5] };
+    ['water', 'highway', 'main', 'minor'].forEach((kind) => LINES.filter((l) => l.kind === kind).forEach((l) => {
+      if (kind === 'main') base += '<polyline points="' + poly(l.pts) + '" fill="none" stroke="#E6D5C3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>';
+      base += '<polyline points="' + poly(l.pts) + '" fill="none" stroke="' + style[kind][0] + '" stroke-width="' + style[kind][1] + '" stroke-linecap="round" stroke-linejoin="round"/>';
+    }));
+    LINES.forEach((l) => { const m = l.pts[Math.floor(l.pts.length / 2)]; const x = X(m[1]), y = Y(m[0]); if (x < 10 || x > W - 10 || y < 14 || y > H - 6) return; base += '<text x="' + (x + 6).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" ' + font + ' font-size="10.5" font-weight="700" fill="' + (l.kind === 'water' ? '#2F6E86' : '#6B5E55') + '" paint-order="stroke" stroke="#FFF4E8" stroke-width="3">' + esc(l.name) + '</text>'; });
+    const pz = PARK[0]; base += '<text x="' + (X(-97.7735) - 22).toFixed(1) + '" y="' + Y(30.2672).toFixed(1) + '" ' + font + ' font-size="10.5" font-weight="700" fill="#24735F">Zilker Park</text>';
+    // Overlay: proximity lines (pick mode) or bar-hop path, plus start-to-pick route.
+    let over = '';
+    let near = [];
+    if (!hop && focus) {
+      near = r.matches.concat(r.close).filter((e) => e.v.id !== focus.id).map((e) => ({ e: e, tr: travel(focus, e.v) })).sort((a, b) => a.tr.walk - b.tr.walk).slice(0, 3);
+      near.forEach((n) => { over += '<line x1="' + X(focus.lng).toFixed(1) + '" y1="' + Y(focus.lat).toFixed(1) + '" x2="' + X(n.e.v.lng).toFixed(1) + '" y2="' + Y(n.e.v.lat).toFixed(1) + '" stroke="#1A1440" stroke-width="1.5" stroke-dasharray="2 4" stroke-linecap="round"/>'; });
+      if (S.start) { const tr = travel(S.start, focus); over += '<line x1="' + X(S.start.lng).toFixed(1) + '" y1="' + Y(S.start.lat).toFixed(1) + '" x2="' + X(focus.lng).toFixed(1) + '" y2="' + Y(focus.lat).toFixed(1) + '" stroke="#1B2F9E" stroke-width="4" stroke-dasharray="9 6" stroke-linecap="round"/>' + '<text x="' + ((X(S.start.lng) + X(focus.lng)) / 2 + 8).toFixed(1) + '" y="' + ((Y(S.start.lat) + Y(focus.lat)) / 2).toFixed(1) + '" ' + font + ' font-size="12" font-weight="700" fill="#1B2F9E" paint-order="stroke" stroke="#FFF4E8" stroke-width="4">' + tr.walk + ' min</text>'; }
+    }
+    const hopIndex = {};
+    if (hop) {
+      const path = (S.start ? [[S.start.lat, S.start.lng]] : []).concat(hop.legs.map((l) => [l.v.lat, l.v.lng]));
+      over += '<polyline points="' + poly(path) + '" fill="none" stroke="#1B2F9E" stroke-width="4" stroke-dasharray="9 6" stroke-linecap="round" stroke-linejoin="round"/>';
+      hop.legs.forEach((l, i) => { hopIndex[l.v.id] = i + 1; });
+    }
+    const order = pool.slice().sort((a, b) => (status[a.id] ? (status[a.id].k === 'match' ? 2 : 1) : 0) - (status[b.id] ? (status[b.id].k === 'match' ? 2 : 1) : 0) + ((a === focus) - (b === focus)) * 3);
+    let pins = '';
+    order.forEach((v) => {
+      const st = status[v.id], x = X(v.lng).toFixed(1), y = Y(v.lat).toFixed(1);
+      const fill = st ? (st.k === 'match' ? (st.rank === 1 ? '#E2482A' : '#FFD23F') : '#8FE3CF') : '#FFFFFF';
+      const isFocus = !hop && focus && v.id === focus.id;
+      const r0 = st && st.k === 'match' ? (st.rank === 1 ? 15 : 12) : 8;
+      const lab = hop ? (hopIndex[v.id] || '') : (st && st.k === 'match' ? st.rank : '');
+      pins += '<g class="pin" data-venue="' + v.id + '" role="button" tabindex="0" aria-label="' + esc(v.name) + '" style="cursor:pointer">' +
+        (isFocus || hopIndex[v.id] ? '<circle cx="' + x + '" cy="' + y + '" r="' + (r0 + 6) + '" fill="none" stroke="#1B2F9E" stroke-width="3"/>' : '') +
+        '<circle cx="' + x + '" cy="' + y + '" r="' + r0 + '" fill="' + fill + '" stroke="#1A1440" stroke-width="2.5"/>' +
+        (lab !== '' ? '<text x="' + x + '" y="' + (+y + 4.5) + '" text-anchor="middle" ' + font + ' font-size="12" font-weight="700" fill="' + (st && st.rank === 1 && !hop ? '#FFFFFF' : '#1A1440') + '">' + lab + '</text>' : '') + '</g>';
+    });
+    if (focus && !hop) { const fx = X(focus.lng), left = fx > W * 0.62; pins += '<text x="' + (left ? fx - 22 : fx + 22).toFixed(1) + '" y="' + (Y(focus.lat) + 4).toFixed(1) + '" text-anchor="' + (left ? 'end' : 'start') + '" ' + font + ' font-size="12.5" font-weight="700" fill="#1A1440" paint-order="stroke" stroke="#FFF4E8" stroke-width="4">' + esc(focus.name) + '</text>'; }
+    if (S.start) { const x = X(S.start.lng), y = Y(S.start.lat); pins += '<rect x="' + (x - 9).toFixed(1) + '" y="' + (y - 9).toFixed(1) + '" width="18" height="18" rx="4" fill="#1B2F9E" stroke="#FFFFFF" stroke-width="2.5"/><text x="' + (x + 14).toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" ' + font + ' font-size="12" font-weight="700" fill="#1B2F9E" paint-order="stroke" stroke="#FFF4E8" stroke-width="4">Start</text>'; }
+
+    let panel = '';
+    if (hop) {
+      const legs = hop.legs;
+      const origin = S.start || legs[0].v, dest = legs[legs.length - 1].v;
+      const mids = (S.start ? legs.slice(0, -1) : legs.slice(1, -1)).map((l) => l.v);
+      panel = '<section class="empty"><h2>Your bar hop</h2><p>' + legs.length + ' stops, about 45 min each' + (hop.totalWalk ? ', ' + hop.totalWalk + ' min of walking' : '') + '. Starts ' + (S.when === 'now' ? 'now' : clock(t.min)) + '.</p>' +
+        '<ol class="list" style="list-style:none">' + legs.map((l, i) => '<li><button type="button" class="row" data-venue="' + l.v.id + '"><span class="n">' + (i + 1) + '. ' + esc(l.v.name) + '</span><span class="p">' + (cheapFor(l.v, t.day) != null ? money(cheapFor(l.v, t.day)) : '?') + '</span>' +
+          '<span class="s">' + (l.tr ? esc(travelText(l.tr)) + ' · ' : '') + 'arrive ~' + clock(l.arrive) + '</span>' +
+          '<span class="' + (l.late ? 'why' : 's') + '">' + (l.late ? 'HH over by then' : 'HH until ' + clock(l.end)) + '</span></button></li>').join('') + '</ol>' +
+        '<a class="cta" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' + gmaps(origin, dest, mids) + '" target="_blank" rel="noopener">Open whole route in Google Maps</a>' +
+        (legs.length < 2 ? '<p class="note">No other match within a 20 min walk is still pouring after ' + esc(legs[0].v.name) + '. Try an earlier time or All 4 neighborhoods.</p>' : '') + '<p class="foot">Each next stop is the closest match within a 20 min walk that\'s still pouring when you arrive. About 45 min per stop. Times are estimates.</p></section>';
+    } else if (focus) {
+      const fe = evaluate(focus);
+      panel = '<button type="button" class="card" data-venue="' + focus.id + '"><span class="badge">' + (fe.bucket === 'match' ? 'Match · ' + fe.score + '/100' : esc(focus.hood)) + '</span><h3>' + esc(focus.name) + '</h3>' + (fe.why ? '<p>' + esc(fe.why.join(', ')) + '</p>' : '') + (S.start ? '<p class="score">' + esc(fromStart(focus)) + '</p>' : '') + '</button>' +
+        '<div class="grid2"><a class="cta" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' + gmaps(S.start, focus) + '" target="_blank" rel="noopener">Google Maps</a><a class="ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink)" href="' + amaps(S.start, focus) + '" target="_blank" rel="noopener">Apple Maps</a></div>' +
+        (near.length ? '<section><h2 style="margin-bottom:10px">Closest other matches</h2><ul class="list">' + near.map((n) => '<li><button type="button" class="row" data-focus="' + n.e.v.id + '"><span class="n">' + esc(n.e.v.name) + '</span><span class="p">' + (n.e.cheap != null ? money(n.e.cheap) : '?') + '</span><span class="s">' + esc(travelText(n.tr)) + ' from ' + esc(focus.name) + '</span><span class="s">' + (n.e.bucket === 'close' ? 'close match' : n.e.score + '/100') + '</span></button></li>').join('') + '</ul></section>' : '');
+    }
+    let mapBox = '<div class="mapbox"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Map of happy hours with main streets">' + '<rect width="' + W + '" height="' + H + '" fill="#FFF4E8"/>' + base + over + pins + '</svg></div>';
+    if (USE_LEAFLET) {
+      const id = 'leaf-' + (embed ? 'e' : 'm');
+      PENDING.push({ id: id, pool: pool, status: status, focus: hop ? null : focus, near: near, hop: hop, hopIndex: hopIndex });
+      mapBox = '<div class="mapbox"><div class="leaf' + (embed ? ' leaf-e' : '') + '" id="' + id + '" role="region" aria-label="Street map of happy hours"></div></div>';
+    }
+    const mapHtml = mapBox +
+      '<div class="legend"><span><span class="dot" style="background:#E2482A"></span>#1 match</span><span><span class="dot" style="background:#FFD23F"></span>Matches</span><span><span class="dot" style="background:#8FE3CF"></span>Close</span><span><span class="dot" style="background:#FFFFFF"></span>Not now</span>' + (S.start ? '<span><span class="dot" style="background:#1B2F9E;border-radius:4px"></span>Start</span>' : '') + '</div>';
+    if (embed) return mapHtml;
+    return '<div class="main">' + backHeader('Back', '<span class="step">' + pool.length + ' spots</span>') +
+      '<div class="grid2" role="group" aria-label="Map mode"><button type="button" class="seg" data-mode="pick"' + pressed(!hop) + '>Route to a pick</button><button type="button" class="seg" data-mode="hop"' + pressed(!!hop) + (r.matches.length < 2 ? ' disabled' : '') + '>Bar hop</button></div>' +
+      mapHtml +
+      '<p class="foot">Tap a pin to center on it. Walk times are estimates; tap Google or Apple Maps for exact directions.</p>' +
+      '</div><aside class="side">' + startForm() + panel + '</aside>';
+  }
+
+  function render() {
+    const views = { start: viewStart, vibe: viewVibe, results: viewResults, detail: viewDetail, map: viewMap };
+    MAPS.forEach((m) => m.remove()); MAPS.length = 0; PENDING.length = 0;
+    const html = views[S.screen]();
+    app.className = 'app s-' + S.screen;
+    app.innerHTML = html.indexOf('class="main"') >= 0 ? html : '<div class="main">' + html + '</div>';
+    if (USE_LEAFLET) PENDING.forEach(mountMap);
+  }
+
+  // Real street map (live site only): CARTO Voyager tiles over OpenStreetMap data, same pin colors as the drawn map.
+  function pinIcon(fill, d, label, ring, light) {
+    return L.divIcon({ className: 'lpin-wrap', iconSize: [d, d], iconAnchor: [d / 2, d / 2],
+      html: '<span class="lpin' + (ring ? ' ring' : '') + '" style="width:' + d + 'px;height:' + d + 'px;background:' + fill + ';color:' + (light ? '#FFFFFF' : '#1A1440') + '">' + label + '</span>' });
+  }
+  function handlePin(id) { if (S.screen === 'map') { S.focus = id; S.mapMode = 'pick'; render(); } else go('detail', { venue: id }); }
+  function mountMap(spec) {
+    const el = document.getElementById(spec.id);
+    if (!el || el.offsetParent === null) return;
+    const m = L.map(el, { scrollWheelZoom: false, tap: true });
+    MAPS.push(m);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(m);
+    const ll = (p) => [p.lat, p.lng];
+    if (spec.focus) spec.near.forEach((n) => L.polyline([ll(spec.focus), ll(n.e.v)], { color: '#1A1440', weight: 2, dashArray: '2 7', interactive: false }).addTo(m));
+    if (spec.focus && S.start) {
+      const tr = travel(S.start, spec.focus);
+      L.polyline([ll(S.start), ll(spec.focus)], { color: '#1B2F9E', weight: 4, dashArray: '10 8', interactive: false }).addTo(m)
+        .bindTooltip(tr.walk + ' min walk', { permanent: true, direction: 'center', className: 'ltip ltip-route' });
+    }
+    if (spec.hop) L.polyline((S.start ? [ll(S.start)] : []).concat(spec.hop.legs.map((l) => ll(l.v))), { color: '#1B2F9E', weight: 4, dashArray: '10 8', interactive: false }).addTo(m);
+    const rankOf = (v) => (spec.status[v.id] ? (spec.status[v.id].k === 'match' ? 2 : 1) : 0);
+    spec.pool.slice().sort((a, b) => rankOf(a) - rankOf(b)).forEach((v) => {
+      const st = spec.status[v.id];
+      const isMatch = st && st.k === 'match', first = isMatch && st.rank === 1;
+      const fill = st ? (isMatch ? (first ? '#E2482A' : '#FFD23F') : '#8FE3CF') : '#FFFFFF';
+      const d = isMatch ? (first ? 34 : 28) : 18;
+      const label = spec.hop ? (spec.hopIndex[v.id] || '') : (isMatch ? st.rank : '');
+      const ring = (spec.focus && spec.focus.id === v.id) || !!spec.hopIndex[v.id];
+      const mk = L.marker(ll(v), { icon: pinIcon(fill, d, label, ring, first && !spec.hop), zIndexOffset: rankOf(v) * 100 + (ring ? 500 : 0), title: v.name, keyboard: true }).addTo(m);
+      mk.on('click', () => handlePin(v.id));
+      if (spec.focus && spec.focus.id === v.id) mk.bindTooltip(v.name, { permanent: true, direction: 'right', offset: [d / 2 + 4, 0], className: 'ltip' });
+      else mk.bindTooltip(v.name + (st && isMatch ? ' · #' + st.rank : ''), { direction: 'top', offset: [0, -d / 2], className: 'ltip' });
+    });
+    if (S.start) L.marker(ll(S.start), { icon: L.divIcon({ className: 'lpin-wrap', iconSize: [20, 20], iconAnchor: [10, 10], html: '<span class="lstart"></span>' }), zIndexOffset: 1000, title: 'Start' }).addTo(m).bindTooltip('Start', { permanent: true, direction: 'left', offset: [-12, 0], className: 'ltip ltip-route' });
+    const pts = spec.pool.map(ll); if (S.start) pts.push(ll(S.start));
+    m.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: 16 });
+  }
+
+  app.addEventListener('click', (ev) => {
+    const el = ev.target.closest('[data-act],[data-go],[data-mode],[data-focus],[data-hood],[data-when],[data-vibe],[data-price],[data-group],[data-venue]');
+    if (!el) return;
+    const d = el.dataset;
+    if (d.act === 'back') return back();
+    if (d.act === 'home') { S.prev = []; S.screen = 'start'; return render(); }
+    if (d.act === 'pick5') { S.when = 'pick'; S.day = NOW.day; S.min = 1020; save(); return render(); }
+    if (d.act === 'clearstart') { S.start = null; S.startError = null; save(); return render(); }
+    if (d.act === 'locate') {
+      S.locating = true; S.startError = null; render();
+      navigator.geolocation.getCurrentPosition((pos) => { S.locating = false; S.start = { label: 'My location', lat: pos.coords.latitude, lng: pos.coords.longitude }; save(); render(); },
+        () => { S.locating = false; S.startError = 'Couldn\'t get your location. Allow location access, or type an address.'; render(); }, { timeout: 10000, maximumAge: 60000 });
+      return;
+    }
+    if (d.mode) S.mapMode = d.mode;
+    if (d.focus && S.screen === 'map' && !d.go) { S.focus = d.focus; S.mapMode = 'pick'; return render(); }
+    if (d.focus) S.focus = d.focus;
+    if (d.go) { if (d.go === 'map' && !d.focus && !d.mode) S.focus = null; return go(d.go); }
+    if (d.venue && S.screen === 'map' && ev.target.closest('.pin')) { S.focus = d.venue; S.mapMode = 'pick'; return render(); }
+    if (d.venue) return go('detail', { venue: d.venue });
+    if (d.mode) { save(); return render(); }
+    if (d.hood) {
+      if (d.hood === 'all') S.hoods = HOODS.slice();
+      else if (S.hoods.indexOf(d.hood) >= 0) { if (S.hoods.length > 1) S.hoods = S.hoods.filter((h) => h !== d.hood); }
+      else S.hoods = HOODS.filter((h) => h === d.hood || S.hoods.indexOf(h) >= 0);
+    }
+    if (d.when) S.when = d.when;
+    if (d.vibe) S.vibes[d.vibe] = !S.vibes[d.vibe];
+    if (d.price) S.price = d.price === 'any' ? null : Number(d.price);
+    if (d.group) S.group = d.group;
+    save(); render();
+  });
+  app.addEventListener('submit', (ev) => {
+    if (ev.target.id !== 'startform') return; ev.preventDefault();
+    const q = document.getElementById('startq').value;
+    const res = geocode(q);
+    if (res && res.error && USE_LEAFLET) { searchOnline(q); return; }
+    if (!res) { S.start = null; S.startError = null; } else if (res.error) { S.startError = res.error; } else { S.start = res; S.startError = null; }
+    save(); render();
+  });
+  // Live site: fall back to OpenStreetMap address search, limited to central Austin.
+  function searchOnline(q) {
+    S.startError = 'Searching…'; render();
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&bounded=1&viewbox=-97.86,30.34,-97.66,30.17&q=' + encodeURIComponent(q + ', Austin, TX'), { headers: { 'Accept-Language': 'en' } })
+      .then((r) => r.json())
+      .then((rows) => {
+        if (rows && rows.length) { S.start = { label: rows[0].display_name.split(',').slice(0, 2).join(',').trim(), lat: +rows[0].lat, lng: +rows[0].lon }; S.startError = null; }
+        else S.startError = 'Couldn\'t find "' + q + '" in central Austin. Try a street address, cross streets, or a landmark.';
+        save(); render();
+      })
+      .catch(() => { S.startError = 'Address search is unavailable right now. Try a landmark or cross streets.'; render(); });
+  }
+  app.addEventListener('keydown', (ev) => { const p = ev.target.closest('.pin'); if (p && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); S.focus = p.dataset.venue; S.mapMode = 'pick'; render(); } });
+  app.addEventListener('change', (ev) => {
+    if (ev.target.id !== 'day' && ev.target.id !== 'time') return;
+    if (ev.target.id === 'day') S.day = Number(ev.target.value);
+    if (ev.target.id === 'time') S.min = Number(ev.target.value);
+    save(); render();
+  });
+  render();
+})();
+</script>
