@@ -114,7 +114,7 @@ select { font: inherit; font-size: 16px; min-height: 48px; padding: 0 12px; bord
 .today { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--sun); margin-left: 6px; }
 details summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 .mapbox { background: #FFF4E8; border: 3px solid var(--ink); border-radius: 24px; box-shadow: 6px 6px 0 var(--ink); overflow: hidden; }
-.mapbox svg { display: block; width: 100%; height: auto; }
+.mapbox > svg { display: block; width: 100%; height: auto; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; font-weight: 700; }
 .dot { display: inline-block; width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--ink); vertical-align: -2px; margin-right: 6px; }
 .foot { font-size: 12px; color: var(--muted); text-align: center; }
@@ -287,6 +287,10 @@ __DATA__
     });
     return best || { kind: 'off' };
   }
+  function statusText(v, t) {
+    const ts = timeStatus(v, t);
+    return ts.kind === 'unknown' ? 'Times not confirmed' : ts.kind === 'on' ? 'On ' + (S.when === 'now' ? 'now' : 'at ' + clock(t.min)) + ' · ' + dur(ts.left) + ' left' : ts.kind === 'ending' ? 'Ends in ' + ts.left + ' min' : ts.kind === 'soon' ? 'Starts in ' + dur(ts.wait) : 'Not on at ' + clock(t.min) + (S.when === 'now' ? '' : ' ' + DAYS[t.day].slice(0, 3));
+  }
 
   function evaluate(v) {
     const t = target();
@@ -457,7 +461,7 @@ __DATA__
   function viewDetail() {
     const v = VENUES.find((x) => x.id === S.venue), t = target(), e = evaluate(v);
     const deals = dealsFor(v, t.day);
-    const status = e.bucket === 'unknown' ? 'Times not confirmed' : e.ts.kind === 'on' ? 'On ' + (S.when === 'now' ? 'now' : 'at ' + clock(t.min)) + ' · ' + dur(e.ts.left) + ' left' : e.ts.kind === 'ending' ? 'Ends in ' + e.ts.left + ' min' : e.ts.kind === 'soon' ? 'Starts in ' + dur(e.ts.wait) : 'Not on at ' + clock(t.min) + (S.when === 'now' ? '' : ' ' + DAYS[t.day].slice(0, 3));
+    const status = statusText(v, t);
     const known = [], unknown = [];
     [['patio', 'Patio'], ['dogs', 'Dogs welcome'], ['sports', 'Sports on TV'], ['music', 'Live music'], ['resv', 'Takes reservations']].forEach((p) => { if (v[p[0]] === true) known.push(p[1]); else if (v[p[0]] == null) unknown.push(p[1].toLowerCase()); });
     const label = e.bucket === 'match' ? 'Match · ' + e.score + '/100' : e.bucket === 'close' ? 'Close: ' + e.misses[0] : v.hood;
@@ -558,7 +562,8 @@ __DATA__
         (legs.length < 2 ? '<p class="note">No other match within a 20 min walk is still pouring after ' + esc(legs[0].v.name) + '. Try an earlier time or All 4 neighborhoods.</p>' : '') + '<p class="foot">Each next stop is the closest match within a 20 min walk that\'s still pouring when you arrive. About 45 min per stop. Times are estimates.</p></section>';
     } else if (focus) {
       const fe = evaluate(focus);
-      panel = '<button type="button" class="card" data-venue="' + focus.id + '"><span class="badge">' + (fe.bucket === 'match' ? 'Match · ' + fe.score + '/100' : esc(focus.hood)) + '</span><h3>' + esc(focus.name) + '</h3>' + (fe.why ? '<p>' + esc(fe.why.join(', ')) + '</p>' : '') + (S.start ? '<p class="score">' + esc(fromStart(focus)) + '</p>' : '') + '</button>' +
+      panel = '<button type="button" class="card" data-venue="' + focus.id + '"><span class="badge">' + (fe.bucket === 'match' ? 'Match · ' + fe.score + '/100' : esc(focus.hood)) + '</span><h3>' + esc(focus.name) + '</h3>' + '<span class="tag time" style="align-self:flex-start">' + esc(statusText(focus, t)) + '</span><p><strong>Happy hour: ' + esc(hoursText(focus)) + '</strong></p>' + (fe.why ? '<p>' + esc(fe.why.join(', ')) + '</p>' : '') + (S.start ? '<p class="score">' + esc(fromStart(focus)) + '</p>' : '') + '</button>' +
+        '<button type="button" class="ghost" data-venue="' + focus.id + '">See venue details and deals</button>' +
         '<div class="grid2"><a class="cta" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' + gmaps(S.start, focus) + '" target="_blank" rel="noopener">Google Maps</a><a class="ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink)" href="' + amaps(S.start, focus) + '" target="_blank" rel="noopener">Apple Maps</a></div>' +
         (near.length ? '<section><h2 style="margin-bottom:10px">Closest other matches</h2><ul class="list">' + near.map((n) => '<li><button type="button" class="row" data-focus="' + n.e.v.id + '"><span class="n">' + esc(n.e.v.name) + '</span><span class="p">' + (n.e.cheap != null ? money(n.e.cheap) : '?') + '</span><span class="s">' + esc(travelText(n.tr)) + ' from ' + esc(focus.name) + '</span><span class="s">' + (n.e.bucket === 'close' ? 'close match' : n.e.score + '/100') + '</span></button></li>').join('') + '</ul></section>' : '');
     }
@@ -587,18 +592,24 @@ __DATA__
     if (USE_LEAFLET) PENDING.forEach(mountMap);
   }
 
-  // Real street map (live site only): CARTO Voyager tiles over OpenStreetMap data, same pin colors as the drawn map.
+  // Real street map (live site only): OpenStreetMap tiles, same pin colors as the drawn map.
   function pinIcon(fill, d, label, ring, light) {
     return L.divIcon({ className: 'lpin-wrap', iconSize: [d, d], iconAnchor: [d / 2, d / 2],
       html: '<span class="lpin' + (ring ? ' ring' : '') + '" style="width:' + d + 'px;height:' + d + 'px;background:' + fill + ';color:' + (light ? '#FFFFFF' : '#1A1440') + '">' + label + '</span>' });
   }
-  function handlePin(id) { if (S.screen === 'map') { S.focus = id; S.mapMode = 'pick'; render(); } else go('detail', { venue: id }); }
+  function handlePin(id) {
+    if (S.screen !== 'map') return go('detail', { venue: id });
+    S.focus = id; S.mapMode = 'pick'; render();
+    // On narrow screens the venue card sits below the map; bring it into view.
+    const card = window.innerWidth < 960 && app.querySelector('.s-map .side .card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   function mountMap(spec) {
     const el = document.getElementById(spec.id);
     if (!el || el.offsetParent === null) return;
     const m = L.map(el, { scrollWheelZoom: false, tap: true });
     MAPS.push(m);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(m);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(m);
     const ll = (p) => [p.lat, p.lng];
     if (spec.focus) spec.near.forEach((n) => L.polyline([ll(spec.focus), ll(n.e.v)], { color: '#1A1440', weight: 2, dashArray: '2 7', interactive: false }).addTo(m));
     if (spec.focus && S.start) {
@@ -618,7 +629,7 @@ __DATA__
       const mk = L.marker(ll(v), { icon: pinIcon(fill, d, label, ring, first && !spec.hop), zIndexOffset: rankOf(v) * 100 + (ring ? 500 : 0), title: v.name, keyboard: true }).addTo(m);
       mk.on('click', () => handlePin(v.id));
       if (spec.focus && spec.focus.id === v.id) mk.bindTooltip(v.name, { permanent: true, direction: 'right', offset: [d / 2 + 4, 0], className: 'ltip' });
-      else mk.bindTooltip(v.name + (st && isMatch ? ' · #' + st.rank : ''), { direction: 'top', offset: [0, -d / 2], className: 'ltip' });
+      else mk.bindTooltip(v.name + (st && isMatch ? ' · #' + st.rank : ' · HH ' + hoursText(v)), { direction: 'top', offset: [0, -d / 2], className: 'ltip' });
     });
     if (S.start) L.marker(ll(S.start), { icon: L.divIcon({ className: 'lpin-wrap', iconSize: [20, 20], iconAnchor: [10, 10], html: '<span class="lstart"></span>' }), zIndexOffset: 1000, title: 'Start' }).addTo(m).bindTooltip('Start', { permanent: true, direction: 'left', offset: [-12, 0], className: 'ltip ltip-route' });
     const pts = spec.pool.map(ll); if (S.start) pts.push(ll(S.start));
